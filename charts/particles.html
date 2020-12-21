@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
+  <script src="https://d3js.org/d3-dsv.v2.min.js"></script>
+  <script src="https://d3js.org/d3-fetch.v2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+</head>
+<body>
+<canvas id="myChart" width="250" height="100"></canvas>
+<script>
+
+function makeChart(data) {
+  var timeFormat = 'MM/DD/YYYY HH:mm';
+
+  var ts = data.map(function(d) {
+    return moment(d.ts)
+  });
+  var particles = data.map(function(d) {return d.particles});
+  var particles_sub = data.map(function(d) {return (d.particles - 1)});
+
+  var chart = new Chart('myChart', {
+    type: 'line',
+    options:{
+      annotation: {},
+      scales: {
+        yAxes : [{
+          ticks : {
+            max : 12,    
+            min : 0
+            }
+          }],
+        xAxes: [{
+          type: 'time',
+          ticks: {
+            source: 'auto',
+          },
+          time: {
+            displayFormats: {
+            quarter: 'MMM YYYY'
+          },
+          parser: timeFormat,
+          tooltipFormat: 'll'
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'Date'
+        },             
+      }],}},
+    data: {
+      labels: ts,
+      datasets: [{
+        data: particles,
+        borderWidth: 1,
+        lineTension: 0.1,
+        borderColor: 'blue',
+        borderWidth: 2,
+        spanGaps: true,
+      },],}
+    })
+  }
+
+// Request data using D3
+d3.csv('https://raw.githubusercontent.com/grothesk/data/main/sonit-formatted.csv')
+  .then(makeChart);
+
+</script>
+
+</body>
+</html>
