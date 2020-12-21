@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
   <script src="https://d3js.org/d3-dsv.v2.min.js"></script>
   <script src="https://d3js.org/d3-fetch.v2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
@@ -19,19 +19,29 @@ function makeChart(data) {
     return moment(d.ts)
   });
   var particles = data.map(function(d) {return d.particles});
-  var particles_sub = data.map(function(d) {return (d.particles - 1)});
+  var warn = data.map(function(d) {return 10});
+  var eingriff = data.map(function(d) {return 15});
 
   var chart = new Chart('myChart', {
     type: 'line',
     options:{
+      plugins: {
+        filler: {
+          propagate: true
+        }
+      },
       annotation: {},
       scales: {
         yAxes : [{
           ticks : {
-            max : 12,    
+            max : 16,    
             min : 0
-            }
-          }],
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Partikel/Raster'
+          }
+        }],
         xAxes: [{
           type: 'time',
           ticks: {
@@ -39,26 +49,59 @@ function makeChart(data) {
           },
           time: {
             displayFormats: {
-            quarter: 'MMM YYYY'
+              quarter: 'MMM YYYY'
+            },
+            parser: timeFormat,
+            tooltipFormat: 'll'
           },
-          parser: timeFormat,
-          tooltipFormat: 'll'
-        },
-        scaleLabel: {
-          display: true,
-          labelString: 'Date'
-        },             
-      }],}},
+          scaleLabel: {
+            display: true,
+            labelString: 't'
+          },
+        }],
+      }
+    },
     data: {
       labels: ts,
-      datasets: [{
-        data: particles,
-        borderWidth: 1,
-        lineTension: 0.1,
-        borderColor: 'blue',
-        borderWidth: 2,
-        spanGaps: true,
-      },],}
+      datasets: [
+        {
+          label: "Wochendurchschnitt",
+          data: particles,
+          borderWidth: 1,
+          lineTension: 0.1,
+          borderColor: 'blue',
+          borderWidth: 2,
+          spanGaps: true
+        },
+        {
+          label: "Warngrenze",
+          data: warn,
+          borderWidth: 1,
+          lineTension: 0.1,
+          borderColor: 'green',
+          backgroundColor: 'rgba(204, 255, 204, 0.1)',
+          fillOpacity: 1,
+          fill: 'origin',
+          borderWidth: 2,
+          spanGaps: true,
+          pointRadius: 1,
+          pointStyle: 'line',
+        },
+        {
+          label: "Eingriffsgrenze",
+          data: eingriff,
+          borderWidth: 1,
+          lineTension: 0.1,
+          borderColor: 'red',
+          backgroundColor: 'rgba(255, 204, 204, 0.1)',
+          fill: 1,
+          borderWidth: 2,
+          spanGaps: true,
+          pointRadius: 1,
+          pointStyle: 'line',
+        }
+        ],
+      }
     })
   }
 
